@@ -145,4 +145,4 @@ The skill is optimized for B200 / sm_100 metric names, but the workflow and help
 
 ## License
 
-MIT — see `LICENSE` if present (or add one you prefer).
+MIT
