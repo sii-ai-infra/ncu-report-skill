@@ -1,4 +1,11 @@
 # ncu-report-skill
+> [!IMPORTANT]
+> This skill is maintained as a standalone submodule of
+> [Kernel Design Agents (KDA)](https://github.com/mit-han-lab/kernel-design-agents)
+> for easy installation.
+>
+> For bug reports, feature requests, and discussions, please use the main KDA repository:
+> https://github.com/mit-han-lab/kernel-design-agents
 
 A Claude Code skill for profiling CUDA kernels with Nsight Compute on NVIDIA B200 (sm_100). Covers the full workflow: build a standalone harness, run `ncu`, parse reports with the Python API, walk through six analysis dimensions, match patterns to a diagnosis playbook, and write an evidence-backed optimization report.
 
