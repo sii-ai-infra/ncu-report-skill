@@ -1,13 +1,13 @@
 ---
 name: ncu-report-skill
-description: Profile CUDA kernels with Nsight Compute on B200 / sm_100. Use when the user asks to profile a kernel, analyze its performance, diagnose bottlenecks, read an ncu report, or write an optimization plan — including variants in Chinese ("profile 一下", "为什么慢", "ncu 报告").
+description: Profile CUDA kernels with Nsight Compute on H200 / sm90 and B200 / sm_100. Use when the user asks to profile a kernel, analyze its performance, diagnose bottlenecks, read an ncu report, or write an optimization plan — including variants in Chinese ("profile 一下", "为什么慢", "ncu 报告").
 ---
 
-# Skill: CUDA Kernel Profiling (B200 / Nsight Compute)
+# Skill: CUDA Kernel Profiling (B200 / H200 / Nsight Compute)
 
 **When to use:** user asks to profile a CUDA kernel, analyze its performance, find its bottlenecks, or write an optimization plan based on Nsight Compute data. Triggers include: "profile X", "为什么这个 kernel 慢", "ncu report 说...", "下一步怎么优化", "帮我看一下这份 ncu 报告".
 
-**Target hardware (this repo):** NVIDIA B200 (sm_100, CC 10.0, 148 SMs, 192 GB HBM3e). Most advice below is generic; B200-specific notes are explicitly marked.
+**Target hardware (this repo):** NVIDIA B200 (sm_100, CC 10.0, 148 SMs, 192 GB HBM3e) and NVIDIA H200 (sm90, CC 9.0, 128 SMs, 192 GB HBM3e). Most advice below is generic; B200-specific notes are explicitly marked.
 
 ---
 
@@ -51,16 +51,18 @@ Most under-performing CUDA kernels are under-performing for exactly one reason t
 | [`reference/03-collection.md`](reference/03-collection.md) | ncu command recipes: full, source-level, PM sampling, custom sections |
 | [`reference/04-python-api.md`](reference/04-python-api.md) | `ncu_report` Python API patterns with copy-pasteable code |
 | [`reference/05-analysis-dimensions.md`](reference/05-analysis-dimensions.md) | Six analysis dimensions: occupancy, balance, stalls, tensor core, timeline, memory |
-| [`reference/06-diagnosis-playbook.md`](reference/06-diagnosis-playbook.md) | Pattern → diagnosis → fix. Merges Blackwell programming principles with NCU signals |
+| [`reference/06-diagnosis-playbook.md`](reference/06-diagnosis-playbook.md) | Pattern → diagnosis → fix. Merges CUDA/Blackwell programming principles with NCU signals |
 | [`reference/07-report-template.md`](reference/07-report-template.md) | How to structure the final report |
 | [`reference/08-b200-metric-names.md`](reference/08-b200-metric-names.md) | sm_100 metric names vs older GPUs — many common names are different |
 | [`reference/09-common-issues.md`](reference/09-common-issues.md) | Permissions, PM sampling gaps, TVM-FFI / PyTorch gotchas |
+| [`reference/10-kernel-instrumentation.md`](reference/10-kernel-instrumentation.md) | Device-side timing/counter instrumentation patterns and when to use them |
 
 ### Helpers (reusable code)
 
 | File | Purpose |
 |---|---|
 | [`helpers/harness_template.cu`](helpers/harness_template.cu) | Standalone harness template — paste your kernel, fill in input allocation, done |
+| [`helpers/instrumentation_snippet.cu`](helpers/instrumentation_snippet.cu) | Copy-paste `clock64()` / `%globaltimer` probes for per-CTA phase timing |
 | [`helpers/safetensors_loader.h`](helpers/safetensors_loader.h) | Header-only safetensors reader (no external deps) for loading real workload tensors |
 | [`helpers/analyze_reports.py`](helpers/analyze_reports.py) | Extract key metrics, produce side-by-side comparisons |
 | [`helpers/extract_stall_hotspots.py`](helpers/extract_stall_hotspots.py) | Per-line stall aggregation via `action.source_info(pc)` |
@@ -80,12 +82,15 @@ Most under-performing CUDA kernels are under-performing for exactly one reason t
 
 4. **Load-imbalance on variable-length inputs is often the #1 bottleneck.** If the user's workload has sequences of varying length, per-SM active-cycle variance will often dwarf every other effect. Always check the input distribution.
 
-5. **NCU's rule engine (`--page details`) already does half the work.** Each rule comes with `Est. Speedup: X%`. Read them first — they often point straight at the answer.
+5. **Kernel-internal instrumentation is a probe, not a replacement for NCU.** Use `clock64()` / `%globaltimer` probes when you need per-CTA or per-phase timing, but validate the hypothesis with an uninstrumented NCU run. See [`reference/10-kernel-instrumentation.md`](reference/10-kernel-instrumentation.md).
 
-6. **Don't delegate understanding.** Run the profiles yourself, open the reports, cite specific metric values. Never write "the profile shows it's memory-bound" — instead, name the two or three metric values that back your conclusion (e.g., "`dram__bytes_read.sum.pct_of_peak_sustained_elapsed` well under 10%, and `long_scoreboard` stalls dominate the pcsamp histogram, so the kernel is **latency-bound on L1**, not DRAM-bandwidth-bound"). Fill in the actual numbers from your report. Specificity is the deliverable.
+6. **NCU's rule engine (`--page details`) already does half the work.** Each rule comes with `Est. Speedup: X%`. Read them first — they often point straight at the answer.
+
+7. **Don't delegate understanding.** Run the profiles yourself, open the reports, cite specific metric values. Never write "the profile shows it's memory-bound" — instead, name the two or three metric values that back your conclusion (e.g., "`dram__bytes_read.sum.pct_of_peak_sustained_elapsed` well under 10%, and `long_scoreboard` stalls dominate the pcsamp histogram, so the kernel is **latency-bound on L1**, not DRAM-bandwidth-bound"). Fill in the actual numbers from your report. Specificity is the deliverable.
 
 ---
 
 ## Related skills
 
-- [`blackwell-cuda-programming.md`](blackwell-cuda-programming.md) — Blackwell-specific programming principles and checklists, preserved as a companion reference. Use it when proposing *new* kernel designs; use this skill when diagnosing *existing* kernels.
+- [`cuda-kernel-general-guidelines.md`](cuda-kernel-general-guidelines.md) — architecture-neutral CUDA kernel principles and checklists. Use it when proposing *new* kernel designs; use this skill when diagnosing *existing* kernels.
+- [`blackwell-optimization-guidelines.md`](blackwell-optimization-guidelines.md) — Blackwell / B200 / sm_100a-specific principles and checklists. Use after the general checklist when the target is Blackwell.

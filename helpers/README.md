@@ -7,6 +7,7 @@ Reusable code for profiling harnesses and report analysis. See `../SKILL.md` for
 | File | Purpose |
 |---|---|
 | `harness_template.cu` | Starting point for a profiling harness. Copy into your run dir, fill in the `TODO(you)` sections. |
+| `instrumentation_snippet.cu` | Minimal `clock64()` / `%globaltimer` snippets for per-CTA phase timing. Copy selected pieces into your harness or kernel. |
 | `safetensors_loader.h` | Header-only safetensors reader (no external deps). Use from your harness to load real workload tensors. |
 
 ### Typical harness setup
@@ -15,6 +16,7 @@ Reusable code for profiling harnesses and report analysis. See `../SKILL.md` for
 cd profile/<run_name>/harness/
 cp /path/to/skills/kernel-profiling/helpers/harness_template.cu my_kernel_harness.cu
 cp /path/to/skills/kernel-profiling/helpers/safetensors_loader.h .
+# optional: copy/paste selected probes from instrumentation_snippet.cu
 # edit my_kernel_harness.cu to include your kernel + fill in main()
 nvcc -O2 -std=c++17 -lineinfo -gencode=arch=compute_100,code=sm_100 \
      my_kernel_harness.cu -o my_kernel_harness

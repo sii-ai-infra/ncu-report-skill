@@ -9,7 +9,7 @@
 
 A Claude Code skill for profiling CUDA kernels with Nsight Compute on NVIDIA B200 (sm_100). Covers the full workflow: build a standalone harness, run `ncu`, parse reports with the Python API, walk through six analysis dimensions, match patterns to a diagnosis playbook, and write an evidence-backed optimization report.
 
-The skill is self-contained: reference docs, reusable helper scripts (harness template, safetensors loader, report-analysis Python), and a companion Blackwell programming reference all ship in this repo.
+The skill is self-contained: reference docs, reusable helper scripts (harness template, safetensors loader, report-analysis Python), plus companion CUDA/Blackwell programming references.
 
 ---
 
@@ -26,6 +26,7 @@ The skill is self-contained: reference docs, reusable helper scripts (harness te
 │   ├── extract_stall_hotspots.py     ← per-line stall aggregation (source-level reports)
 │   ├── plot_timeline.py              ← ASCII PM-sampling timeline plots (reveals tail effects)
 │   ├── ncu_utils.py                  ← shared Python helpers, B200-compatible key metric list
+│   ├── instrumentation_snippet.cu    ← copy-paste device-side timing probes for harnesses
 │   └── README.md
 ├── reference/                        ← detailed reference docs
 │   ├── 00-directory-layout.md        ← profile/ directory conventions (read first)
@@ -37,8 +38,11 @@ The skill is self-contained: reference docs, reusable helper scripts (harness te
 │   ├── 06-diagnosis-playbook.md      ← pattern → cause → fix
 │   ├── 07-report-template.md         ← final report structure
 │   ├── 08-b200-metric-names.md       ← sm_100 metric name reference
-│   └── 09-common-issues.md           ← permissions, PM sampling, JIT toolchains, etc.
-└── blackwell-cuda-programming.md     ← companion reference: Blackwell programming principles
+│   ├── 09-common-issues.md           ← permissions, PM sampling, JIT toolchains, etc.
+│   └── 10-kernel-instrumentation.md  ← device-side timing/counter probes and suitable scenarios
+├── cuda-kernel-general-guidelines.md ← companion reference: general CUDA kernel principles
+├── blackwell-optimization-guidelines.md ← companion reference: Blackwell-specific principles
+└── blackwell-cuda-programming.md     ← compatibility index pointing to the two split docs
 ```
 
 ---

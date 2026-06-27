@@ -1,6 +1,6 @@
 # Diagnosis Playbook — Pattern → Cause → Fix
 
-For each observed NCU signal, what does it typically mean, and what's the first fix to try? This synthesizes the Blackwell programming principles (the companion `blackwell-cuda-programming.md` at the repo root) with the profiling signals.
+For each observed NCU signal, what does it typically mean, and what's the first fix to try? This synthesizes the general CUDA principles (`cuda-kernel-general-guidelines.md`) and Blackwell-specific principles (`blackwell-optimization-guidelines.md`) with the profiling signals.
 
 Read this after you've gathered the metrics (via [`05-analysis-dimensions.md`](05-analysis-dimensions.md)) — here you translate metrics into diagnoses and fix directions.
 
@@ -42,7 +42,7 @@ Most kernels will match 2-4 patterns simultaneously. **Rank them by magnitude** 
 - LLM decode (batch=1, query_len=1) is fundamentally small. Split-K over KV length is the standard mitigation.
 - Final reduction stages of a multi-level reduction are naturally small; fuse them into the producing kernel.
 
-**Cross-ref:** Blackwell principle 1 (the companion `blackwell-cuda-programming.md` at the repo root).
+**Cross-ref:** General CUDA principle 1 (`cuda-kernel-general-guidelines.md` at the repo root), plus Blackwell-specific launch/2CTA notes when targeting B200.
 
 ---
 

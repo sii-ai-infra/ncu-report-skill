@@ -19,6 +19,7 @@ __pycache__/
 # Don't ignore source .cu files — those are part of the skill
 
 # NCU scratch / profile outputs (users generate their own — never commit)
+profile/
 *.ncu-rep
 *.ncu-proj
 ncu_home/
